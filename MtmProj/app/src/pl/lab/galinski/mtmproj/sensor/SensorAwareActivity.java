@@ -6,6 +6,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Bundle;
 import android.util.Log;
 
 import org.androidannotations.annotations.EActivity;
@@ -22,13 +23,36 @@ public class SensorAwareActivity extends Activity implements SensorEventListener
     protected static final float Radius = 6378137;
     protected float[] magVal=null;
     protected float[] accVal=null;
-    protected final float cameraB[]=new float[]{0,0,-1};
-    protected float namiarM[]=new float[]{0,1,0};
+    protected final float cameraB[]=new float[]{0,0,1};
+    protected float namiarM[]=new float[]{1,0,0};
     protected float namiarB[]=new float[]{0,1,0};
     protected float cameraM[]=new float[3];
     protected float[] rotFromBtoM=new float[9];
     private SensorManager sensorManager;
+    private float x;
+    private float y;
 
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        float lonx = (float) (18.60228 /180*Math.PI);
+        float latx = (float)(54.33201 /180*Math.PI);
+        float lonu = (float) (18.60264 /180*Math.PI);
+        float latu = (float)(54.33153 /180*Math.PI);
+        float []enu = latlonToENU(latx,lonx,50,latu,lonu,50);
+        Log.i("krbrlog","x:"+enu[0]);
+        Log.i("krbrlog","y:"+enu[1]);
+        Log.i("krbrlog","z:"+enu[2]);
+        namiarM = enu;
+    }
 
     //lat i lon w radianach !!!!
     static float[] latLonToECEF(float lat,float lon,float h){
@@ -97,27 +121,22 @@ public class SensorAwareActivity extends Activity implements SensorEventListener
 
             //rotFrmBtoM*cameraB
 
-            cameraM[0]=cameraB[0]*rotFromBtoM[0]+
-                    cameraB[1]*rotFromBtoM[1]+
-                    cameraB[2]*rotFromBtoM[2];
-            cameraM[1]=cameraB[0]*rotFromBtoM[0+3]+
-                    cameraB[1]*rotFromBtoM[1+3]+
-                    cameraB[2]*rotFromBtoM[2+3];
-            cameraM[2]=cameraB[0]*rotFromBtoM[0+6]+
-                    cameraB[1]*rotFromBtoM[1+6]+
-                    cameraB[2]*rotFromBtoM[2+6];
-            //Log.i("kbbrlog", "getAngle: " + getAngle(northM, cameraM));
-            Log.d(TAG,"Angle: " + getAngle(namiarM, cameraM));
+            if (success) {
+                cameraM[0]=cameraB[0]*rotFromBtoM[0]+cameraB[1]*rotFromBtoM[1]+cameraB[2]*rotFromBtoM[2];
+                cameraM[1]=cameraB[0]*rotFromBtoM[0+3]+cameraB[1]*rotFromBtoM[1+3]+cameraB[2]*rotFromBtoM[2+3];
+                cameraM[2]=cameraB[0]*rotFromBtoM[0+6]+cameraB[1]*rotFromBtoM[1+6]+cameraB[2]*rotFromBtoM[2+6];
+                //Log.i("kbbrlog", "getAngle: " + getAngle(northM, cameraM));
+                Log.d(TAG,"Angle: " + getAngle(namiarM, cameraM));
 
-            namiarB[0]=namiarM[0]*rotFromBtoM[0]+
-                    namiarM[1]*rotFromBtoM[3]+
-                    namiarM[2]*rotFromBtoM[6];
-            namiarB[1]=namiarM[0]*rotFromBtoM[1]+
-                    namiarM[1]*rotFromBtoM[4]+
-                    namiarM[2]*rotFromBtoM[7];
-            namiarB[2]=namiarM[0]*rotFromBtoM[2]+
-                    namiarM[1]*rotFromBtoM[5]+
-                    namiarM[2]*rotFromBtoM[8];
+                namiarB[0]=namiarM[0]*rotFromBtoM[0]+namiarM[1]*rotFromBtoM[3]+namiarM[2]*rotFromBtoM[6];
+                namiarB[1]=namiarM[0]*rotFromBtoM[1]+namiarM[1]*rotFromBtoM[4]+namiarM[2]*rotFromBtoM[7];
+                namiarB[2]=namiarM[0]*rotFromBtoM[2]+namiarM[1]*rotFromBtoM[5]+namiarM[2]*rotFromBtoM[8];
+
+                x=namiarB[0]/namiarB[2];
+                y=namiarB[1]/namiarB[2];
+
+            }
+
 
         }
 

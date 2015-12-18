@@ -1,21 +1,32 @@
 package pl.lab.galinski.mtmproj;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.places.Places;
 
 import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 
 @EActivity(R.layout.activity_main_map)
-public class MainMapActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+public class MainMapActivity extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     private static final String TAG = "MainMapActivity";
     private GoogleApiClient mGoogleApiClient;
+
+    @Click(R.id.lookAroundBt)
+    protected void lookAroundBtClicked(View v){
+        goToLookAroundActivity();
+    }
+
+    private void goToLookAroundActivity() {
+        LookAroundActivity_.intent(this).start();
+    }
 
     @AfterViews
     protected void initGUI(){
