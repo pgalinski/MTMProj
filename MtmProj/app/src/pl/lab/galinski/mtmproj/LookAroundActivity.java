@@ -31,7 +31,6 @@ public class LookAroundActivity extends SensorAwareActivity {
         super.onSensorChanged(sensorEvent);
         camerOverlay.setX(getX());
         camerOverlay.setY(getY());
-        camerOverlay.setDistance((float)getDistance());
         camerOverlay.invalidate();
     }
 }
