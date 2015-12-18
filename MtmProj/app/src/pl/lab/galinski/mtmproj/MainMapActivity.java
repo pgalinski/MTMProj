@@ -1,27 +1,59 @@
 package pl.lab.galinski.mtmproj;
 
-import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.View;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
 import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 
-@EActivity(R.layout.activity_main_map)
-public class MainMapActivity extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+import pl.lab.galinski.mtmproj.model.google.places.api.model.ListOfPlaces;
+import pl.lab.galinski.mtmproj.model.google.places.api.model.PlaceDetails;
+import pl.lab.galinski.mtmproj.sensor.LocationAwareActivity;
+import pl.lab.galinski.mtmproj.task.PlacesApiAsyncTask;
+import pl.lab.galinski.mtmproj.task.PlacesApiTaskListener;
 
+@EActivity(R.layout.activity_main_map)
+public class MainMapActivity extends LocationAwareActivity{
     private static final String TAG = "MainMapActivity";
-    private GoogleApiClient mGoogleApiClient;
+
+    @Bean
+    PlacesApiAsyncTask task;
+
+
+    SupportMapFragment map;
+
+    private ClusterManager<PlaceDetails> clusterManager;
+
+
 
     @Click(R.id.lookAroundBt)
     protected void lookAroundBtClicked(View v){
         goToLookAroundActivity();
+    }
+
+    @Click(R.id.refresh)
+    protected void refreshClicked(View v){
+
+
+        task.exec(new LatLng(54.3321684, 18.6001779), new PlacesApiTaskListener() {
+            @Override
+            public void RequestSuccess(ListOfPlaces places) {
+                clusterManager.clearItems();
+                clusterManager.addItems(places);
+                clusterManager.cluster();
+            }
+
+            @Override
+            public void RequestFailed(Exception exception) {
+
+            }
+        });
     }
 
     private void goToLookAroundActivity() {
@@ -30,43 +62,21 @@ public class MainMapActivity extends FragmentActivity implements GoogleApiClient
 
     @AfterViews
     protected void initGUI(){
-        setupPlacesApiClient();
+        map = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        clusterManager = new ClusterManager<PlaceDetails>(this,map.getMap());
+        map.getMap().setOnCameraChangeListener(clusterManager);
+        clusterManager.setRenderer(new DefaultClusterRenderer<PlaceDetails>(this,map.getMap(),clusterManager));
     }
 
-    private void setupPlacesApiClient() {
-        mGoogleApiClient = new GoogleApiClient
-                .Builder(this)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-    }
 
     @Override
     protected void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
     }
 
     @Override
     protected void onDestroy() {
-        mGoogleApiClient.disconnect();
         super.onDestroy();
     }
 
-    @Override
-    public void onConnected(Bundle bundle) {
-        Log.d(TAG,"Connected!");
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d(TAG,"Connection suspended");
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.d(TAG,"Connection failed!!");
-    }
 }

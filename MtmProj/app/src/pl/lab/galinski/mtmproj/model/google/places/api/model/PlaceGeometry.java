@@ -1,6 +1,5 @@
 package pl.lab.galinski.mtmproj.model.google.places.api.model;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -10,13 +9,13 @@ import com.google.gson.annotations.SerializedName;
 public class PlaceGeometry {
 
     @SerializedName("location")
-    private LatLng location;
+    private Location location;
 
-    public LatLng getLocation() {
+    public Location getLocation() {
         return location;
     }
 
-    public void setLocation(LatLng location) {
+    public void setLocation(Location location) {
         this.location = location;
     }
 }

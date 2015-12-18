@@ -1,6 +1,8 @@
 package pl.lab.galinski.mtmproj.model.google.places.api.model;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.SerializedName;
+import com.google.maps.android.clustering.ClusterItem;
 
 import java.util.ArrayList;
 
@@ -8,7 +10,7 @@ import java.util.ArrayList;
  * Created by Paweł Galiński
  * 16.12.2015
  */
-public class PlaceDetails {
+public class PlaceDetails implements ClusterItem{
     @SerializedName("address_components")
     private ArrayList<AddressComponent> addressComponents;
 
@@ -107,5 +109,10 @@ public class PlaceDetails {
 
     public void setReference(String reference) {
         this.reference = reference;
+    }
+
+    @Override
+    public LatLng getPosition() {
+        return new LatLng(getGeometry().getLocation().getLat(),getGeometry().getLocation().getLng());
     }
 }

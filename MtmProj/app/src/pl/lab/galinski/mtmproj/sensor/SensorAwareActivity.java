@@ -1,29 +1,30 @@
 package pl.lab.galinski.mtmproj.sensor;
 
-import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.Extra;
 
 /**
  * Created by gpawl_000 on 16.12.2015.
  */
 
 @EActivity
-public class SensorAwareActivity extends Activity implements SensorEventListener {
+public class SensorAwareActivity extends LocationAwareActivity implements SensorEventListener {
 
     private static final String TAG = "SensorAwareActivity";
 
     protected static final float Radius = 6378137;
     protected float[] magVal=null;
     protected float[] accVal=null;
-    protected final float cameraB[]=new float[]{0,0,1};
+    protected final float cameraB[]=new float[]{0,0,-1};
     protected float namiarM[]=new float[]{1,0,0};
     protected float namiarB[]=new float[]{0,1,0};
     protected float cameraM[]=new float[3];
@@ -31,6 +32,19 @@ public class SensorAwareActivity extends Activity implements SensorEventListener
     private SensorManager sensorManager;
     private float x;
     private float y;
+
+    private double mylat;
+    private double mylng;
+    private double myAlt;
+
+    @Extra("targetLat")
+    protected double targetLat;
+
+    @Extra("targetLon")
+    protected double targetLon;
+
+    @Extra("targetAlt")
+    protected double targetAlt;
 
     public float getX() {
         return x;
@@ -43,19 +57,33 @@ public class SensorAwareActivity extends Activity implements SensorEventListener
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        float lonx = (float) (18.60228 /180*Math.PI);
-        float latx = (float)(54.33201 /180*Math.PI);
-        float lonu = (float) (18.60264 /180*Math.PI);
-        float latu = (float)(54.33153 /180*Math.PI);
-        float []enu = latlonToENU(latx,lonx,50,latu,lonu,50);
-        Log.i("krbrlog","x:"+enu[0]);
-        Log.i("krbrlog","y:"+enu[1]);
-        Log.i("krbrlog","z:"+enu[2]);
-        namiarM = enu;
+
+        Location lastKnownLocation = getLastKnownLocation();
+        mylat = lastKnownLocation.getLatitude();
+        mylng = lastKnownLocation.getLongitude();
+        myAlt = getLastKnownLocation().getAltitude();
+
+        /*
+        float lonx = (float) (18.6039608 /180*Math.PI);
+        float latx = (float)(54.3297708 /180*Math.PI);
+        float lonu = (float) (18.6001779 /180*Math.PI);
+        float latu = (float)(54.3321684 /180*Math.PI);
+        namiarM = latlonToENU(latx,lonx,50,latu,lonu,50);
+        */
+
     }
 
+    private void calcENU(double lat,double lon,double h , double ulat,double ulon,double uh){
+        float lonx = (float) (lat /180*Math.PI);
+        float latx = (float)(lon /180*Math.PI);
+        float lonu = (float) (ulat /180*Math.PI);
+        float latu = (float)(ulon /180*Math.PI);
+        namiarM = latlonToENU(latx,lonx,50,latu,lonu,50);
+    }
+
+
     //lat i lon w radianach !!!!
-    static float[] latLonToECEF(float lat,float lon,float h){
+    private float[] latLonToECEF(float lat,float lon,float h){
         float[] ECEF = new float[3];
         ECEF[0]=(float)((h+Radius)*Math.cos(lat)*Math.cos(lon));
         ECEF[1]=(float)((h+Radius)*Math.cos(lat)*Math.sin(lon));
@@ -64,7 +92,7 @@ public class SensorAwareActivity extends Activity implements SensorEventListener
     }
 
     //lat i lon w radianach
-    static float[] latlonToENU(float lat,float lon,float h,
+    private float[] latlonToENU(float lat,float lon,float h,
                                float ulat,float ulon,float uh){
         float[] ecefX=latLonToECEF(lat,lon,h);
         float[] ecefU=latLonToECEF(ulat,ulon,uh);
@@ -145,5 +173,15 @@ public class SensorAwareActivity extends Activity implements SensorEventListener
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
 
+    }
+
+
+    @Override
+    public void onLocationChanged(Location location) {
+        super.onLocationChanged(location);
+        mylat = location.getLatitude();
+        mylng = location.getLongitude();
+        myAlt = location.getAltitude();
+        calcENU(targetLat,targetLon,targetAlt,mylat,mylng,myAlt);
     }
 }
