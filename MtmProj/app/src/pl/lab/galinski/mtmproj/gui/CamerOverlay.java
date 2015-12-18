@@ -12,10 +12,10 @@ import android.view.View;
  */
 public class CamerOverlay extends View {
     private final String TAG = "Overlay";
-    private float[] dane=null;
 
     private float x;
     private float y;
+    private float d;
 
     @Override
     public void setX(float x) {
@@ -29,10 +29,6 @@ public class CamerOverlay extends View {
 
     public CamerOverlay(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    public void setDane(float[] dane) {
-        this.dane = dane;
     }
 
 
@@ -54,15 +50,9 @@ public class CamerOverlay extends View {
 
         float sy = canvas.getHeight();
         float sx = canvas.getWidth();
-        canvas.drawCircle(-x*sx+sx/2,y*sy+sy/2,30,p);
+        float cx = -x * sx + sx / 2;
+        float cy = y * sy + sy / 2;
+        canvas.drawCircle(cx, cy, 30, p);
 
-
-        if(dane!=null)
-        {
-            canvas.drawLine(0, 0, 100*dane[0], 100*dane[0], p);
-            p.setStyle(Paint.Style.STROKE);
-            canvas.drawRect(100, 100, 200, 200, p);
-
-        }
     }
 }

@@ -4,4 +4,5 @@
 
     <string name="app_name">MtmProj</string>
     <string name="look_around_button_label">Look around!</string>
+    <string name="point_at">Wskaż</string>
 </resources>

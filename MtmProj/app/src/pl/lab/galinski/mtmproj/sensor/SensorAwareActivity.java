@@ -59,10 +59,17 @@ public class SensorAwareActivity extends LocationAwareActivity implements Sensor
         super.onCreate(savedInstanceState);
 
         Location lastKnownLocation = getLastKnownLocation();
-        mylat = lastKnownLocation.getLatitude();
-        mylng = lastKnownLocation.getLongitude();
-        myAlt = getLastKnownLocation().getAltitude();
+        if (lastKnownLocation!=null) {
+            mylat = lastKnownLocation.getLatitude();
+            mylng = lastKnownLocation.getLongitude();
+            myAlt = getLastKnownLocation().getAltitude();
+        }else{
+            myAlt = 30;
+            mylat = 54.3321684;
+            mylng = 18.6001779;
+        }
 
+        calcENU(targetLat,targetLon,targetAlt,mylat,mylng,myAlt);
         /*
         float lonx = (float) (18.6039608 /180*Math.PI);
         float latx = (float)(54.3297708 /180*Math.PI);
@@ -78,7 +85,7 @@ public class SensorAwareActivity extends LocationAwareActivity implements Sensor
         float latx = (float)(lon /180*Math.PI);
         float lonu = (float) (ulat /180*Math.PI);
         float latu = (float)(ulon /180*Math.PI);
-        namiarM = latlonToENU(latx,lonx,50,latu,lonu,50);
+        namiarM = latlonToENU(latx,lonx,(float)h,latu,lonu,(float)uh);
     }
 
 
